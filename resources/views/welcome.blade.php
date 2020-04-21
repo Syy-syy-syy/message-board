@@ -81,7 +81,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    Laravel
+                    4月20日laravel開始
                 </div>
 
                 <div class="links">
