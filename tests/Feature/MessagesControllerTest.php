@@ -5,93 +5,153 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use \Artisan;
 
 use App\Message;
 
 class MessagesControllerTest extends TestCase
 {
-
-    use RefreshDatabase;
-
-    public static function setUpBeforeClass(): void
+    public function setUp(): void
     {
-        parent::setUpBeforeClass();
-
-        factory(\App\Task::class, 5)->create();
+        parent::setUp();
+        factory(Message::class, 5)->create();
     }
 
-    // public function setUp(): void
-    // {
-    //     parent::setUp();
-
-    //     factory(Message::class, 20)->create();
-    // }
+    public function tearDown(): void
+    {
+        Artisan::call('migrate:refresh');
+        parent::tearDown();
+    }
 
     /**
      * A basic feature test example.
      *
      * @return void
      */
-    public function testIndexStatus()
+    public function testIndexNomalCase()
     {
-        $response = $this->get('/');
+        // 実行
+        $res = $this->get('/');
 
-        $response->assertStatus(200);
+        // 検証
+        $res->assertStatus(200);
     }
 
     public function testShowStatus()
     {
-        $response = $this->get(route('messages.show', ['message' => 8]));
+        // 実行
+        $res = $this->get(route('messages.show', ['message' => 1]));
 
-        $response->assertStatus(200);
-        $response->assertSee('詳細ページ');
+        // 検証
+        $res->assertStatus(200);
+        $res->assertSee('詳細ページ');
     }
 
     public function testCreateStatus()
     {
-        $response = $this->get(route('messages.create', ['message' => 8]));
+        // 実行
+        $res = $this->get(route('messages.create', ['message' => 1]));
 
-        $response->assertStatus(200);
-        $response->assertSee('新規作成ページ');
+        // 検証
+        $res->assertStatus(200);
+        $res->assertSee('新規作成ページ');
     }
 
     public function testEditStatus()
     {
-        $response = $this->get(route('messages.edit', ['message' => 8]));
+        // 実行
+        $res = $this->get(route('messages.edit', ['message' => 1]));
 
-        $response->assertStatus(200);
-        $response->assertSee('編集ページ');
+        // 検証
+        $res->assertStatus(200);
+        $res->assertSee('編集ページ');
     }
 
     public function testStoreStatus()
     {
-        $response = $this->post(route('messages.store', [
+        // 実行
+        $res = $this->post(route('messages.store', [
                 'content' => 'テストメッセージ'
             ])
         );
 
-        $response->assertRedirect('/');
-        $response->assertStatus(302);
+        // 検証
+        $res->assertRedirect('/');
+        $res->assertStatus(302);
+    }
+
+    public function testStore_AfterDB()
+    {
+        // 実行
+        $res = $this->post(route('messages.store', [
+            'title' => 'テストタイトル',
+            'content' => 'テストメッセージ'
+        ])
+    );
+
+    // 検証
+        $this->assertCount(6, Message::all());
+        $this->assertDatabaseHas('messages', [
+            'title' => 'テストタイトル',
+            'content' => 'テストメッセージ'
+        ]);
     }
 
     public function testUpdateStatus()
     {
-        $response = $this->put(route('messages.update', [
-                'message' => 8,
+        // 実行
+        $res = $this->put(route('messages.update', [
+                'message' => 1,
                 'content' => 'testmessage'
             ])
         );
 
-        $response->assertRedirect('/');
-        $response->assertStatus(302);
+        $res->assertRedirect('/');
+        $res->assertStatus(302);
+    }
+
+    public function testUpdateCheckDB()
+    {
+        // 実行
+        $this->put(route('messages.update', [
+                'message' => 1,
+                'title' => 'testtitle',
+                'content' => 'testmessage'
+            ])
+        );
+
+        $this->assertDatabaseHas('messages', [
+            'title' => 'testtitle',
+            'content' => 'testmessage'
+        ]);
+        $this->assertEquals(5, Message::count());
     }
 
     public function testDeleteStatus()
     {
-        $response = $this->delete(route('messages.destroy', [
-                'message' => 8,
+        // 実行
+        $res = $this->delete(route('messages.destroy', [
+                'message' => 1,
             ]
         ));
-        $response->assertStatus(302);
+
+        // 検証
+        $res->assertStatus(302);
+    }
+
+    public function testDeleteCheckDB()
+    {
+        // 準備
+        $message = factory(Message::class)->create();
+
+        // 実行
+        $this->delete(route('messages.destroy', [
+                'message' => 6,
+            ]
+        ));
+
+        // 検証
+        $this->assertCount(5, Message::all());
+        $this->assertDeleted($message);
     }
 }

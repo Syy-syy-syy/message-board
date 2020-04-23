@@ -8,6 +8,7 @@ use App\Message;
 
 $factory->define(Message::class, function (Faker $faker) {
     return [
+        'title' => $faker->sentence(5),
         'content' => $faker->sentence(10),
     ];
 });
