@@ -89,7 +89,7 @@ class MessagesControllerTest extends TestCase
         ])
     );
 
-    // 検証
+        // 検証
         $this->assertCount(6, Message::all());
         $this->assertDatabaseHas('messages', [
             'title' => 'テストタイトル',
@@ -106,6 +106,7 @@ class MessagesControllerTest extends TestCase
             ])
         );
 
+        // 検証
         $res->assertRedirect('/');
         $res->assertStatus(302);
     }
@@ -120,6 +121,7 @@ class MessagesControllerTest extends TestCase
             ])
         );
 
+        // 検証
         $this->assertDatabaseHas('messages', [
             'title' => 'testtitle',
             'content' => 'testmessage'

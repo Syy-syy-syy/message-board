@@ -11,7 +11,7 @@ class MessagesController extends Controller
     // getでmessages/にアクセスされた場合の「一覧表示処理」
     public function index()
     {
-        $messages = Message::all();
+        $messages = Message::orderBy('id', 'desc')->paginate(25);
 
         return view('messages.index', [
             'messages' => $messages,
